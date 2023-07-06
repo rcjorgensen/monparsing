@@ -104,4 +104,14 @@ public class ParserTests
     [Fact]
     public void String_does_not_parse_input_that_does_not_match() =>
         Parser.String("hello")("helicopter").Should().BeEmpty();
+
+    [Fact]
+    public void Int_does_not_parse_non_integer() => Parser.Int("foo").Should().BeEmpty();
+
+    [Fact]
+    public void Int_parses_positive_number() => Parser.Int("10").Should().Equal((10, ""), (1, "0"));
+
+    [Fact]
+    public void Int_parses_negative_number() =>
+        Parser.Int("-10").Should().Equal((-10, ""), (-1, "0"));
 }
