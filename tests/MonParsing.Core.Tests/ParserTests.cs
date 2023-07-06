@@ -37,4 +37,21 @@ public class ParserTests
     [Fact]
     public void Char_parses_input_when_first_char_matches() =>
         Parser.Char('f')("foo").Should().Equal(('f', "oo"));
+
+    [Theory]
+    [InlineData("0")]
+    [InlineData("1")]
+    [InlineData("2")]
+    [InlineData("3")]
+    [InlineData("4")]
+    [InlineData("5")]
+    [InlineData("6")]
+    [InlineData("7")]
+    [InlineData("8")]
+    [InlineData("9")]
+    public void Digit_parses_digits_from_0_to_9(string digit) =>
+        Parser.Digit(digit).Should().Equal((Convert.ToChar(digit), ""));
+
+    [Fact]
+    public void Digit_does_not_parse_non_digit() => Parser.Digit("foo").Should().BeEmpty();
 }

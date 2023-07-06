@@ -27,4 +27,6 @@ public static class Parser
         Item.Bind(x => predicate(x) ? Result(x) : Zero<char>());
 
     public static Parser<char> Char(char x) => Sat(y => x == y);
+
+    public static Parser<char> Digit = Sat(x => '0' <= x && x <= '9');
 }
