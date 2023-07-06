@@ -30,7 +30,12 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
-    - name: Mutate
-      run: |
+  mutation_test:
+    runs-on: ubuntu-latest
+    name: Mutate
+    steps:
+    - uses: actions/checkout@v3
+    - run: |
         dotnet tool restore
         dotnet stryker --reporter "cleartext"
+        
