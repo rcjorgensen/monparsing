@@ -33,4 +33,4 @@ jobs:
     - name: Mutate
       run: |
         dotnet tool restore
-        dotnet stryker
+        dotnet stryker --reporter "cleartext"
