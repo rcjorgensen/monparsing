@@ -12,15 +12,15 @@ public class ParserTests
 
     [Fact]
     public void Seq_does_not_parse_empty_input() =>
-        Parser.Seq(Parser.Item, Parser.Item)("").Should().BeEmpty();
+        Parser.Item.Seq(Parser.Item)("").Should().BeEmpty();
 
     [Fact]
     public void Seq_does_not_parse_input_with_length_1() =>
-        Parser.Seq(Parser.Item, Parser.Item)("f").Should().BeEmpty();
+        Parser.Item.Seq(Parser.Item)("f").Should().BeEmpty();
 
     [Fact]
     public void Seq_does_parses_input_with_length_greater_than_1() =>
-        Parser.Seq(Parser.Item, Parser.Item)("foo").Should().Equal((('f', 'o'), "o"));
+        Parser.Item.Seq(Parser.Item)("foo").Should().Equal((('f', 'o'), "o"));
 
     [Fact]
     public void Sat_does_not_parse_input_when_predicate_is_not_satisfied() =>
@@ -54,4 +54,20 @@ public class ParserTests
 
     [Fact]
     public void Digit_does_not_parse_non_digit() => Parser.Digit("foo").Should().BeEmpty();
+
+    [Fact]
+    public void Word_parses_input_with_multiple_results() =>
+        Parser.Word("Yes!").Should().Equal(("Yes", "!"), ("Ye", "s!"), ("Y", "es!"), ("", "Yes!"));
+
+    [Fact]
+    public void String_of_empty_string_parses_empty_input() =>
+        Parser.String("")("").Should().Equal(("", ""));
+
+    [Fact]
+    public void String_parses_input_that_matches() =>
+        Parser.String("hello")("hello world").Should().Equal(("hello", " world"));
+
+    [Fact]
+    public void String_does_not_parse_input_that_does_not_match() =>
+        Parser.String("hello")("helicopter").Should().BeEmpty();
 }
