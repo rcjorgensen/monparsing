@@ -2,7 +2,7 @@ using FluentAssertions;
 
 namespace MonParsing.Core.Tests;
 
-public class UnitTest1
+public class ParserTests
 {
     [Fact]
     public void Item_does_not_parse_empty_input() => Parser.Item("").Should().BeEmpty();
@@ -29,4 +29,12 @@ public class UnitTest1
     [Fact]
     public void Sat_parses_input_when_predicate_is_satisfied() =>
         Parser.Sat(c => c == 'f')("foo").Should().Equal(('f', "oo"));
+
+    [Fact]
+    public void Char_does_not_parse_input_when_first_char_does_not_match() =>
+        Parser.Char('f')("bar").Should().BeEmpty();
+
+    [Fact]
+    public void Char_parses_input_when_first_char_matches() =>
+        Parser.Char('f')("foo").Should().Equal(('f', "oo"));
 }

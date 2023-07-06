@@ -26,5 +26,5 @@ public static class Parser
     public static Parser<char> Sat(Predicate<char> predicate) =>
         Item.Bind(x => predicate(x) ? Result(x) : Zero<char>());
 
-    
+    public static Parser<char> Char(char x) => Sat(y => x == y);
 }
