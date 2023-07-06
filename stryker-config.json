@@ -1,0 +1,13 @@
+{
+    "stryker-config": {
+        "reporters": [
+            "cleartext",
+            "progress"
+        ],
+        "thresholds": {
+            "high": 99,
+            "low": 95,
+            "break": 90
+        }
+    }
+}
