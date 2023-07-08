@@ -2,21 +2,30 @@
 
 public delegate IEnumerable<(T, string)> Parser<T>(string input);
 
-public static class Parser
+public static class Parsers
 {
-    private static IEnumerable<(T, string)> Empty<T>() => Enumerable.Empty<(T, string)>();
+    public static IEnumerable<(T, string)> Zero<T>(string input)
+    {
+        yield break;
+    }
 
-    public static Parser<T> Result<T>(T value) =>
-        (string input) => new List<(T, string)> { (value, input) };
+    private static IEnumerable<(T, string)> Result<T>(T value, string input)
+    {
+        yield return (value, input);
+    }
 
-    public static Parser<T> Zero<T>() => (string _) => Empty<T>();
+    public static Parser<T> Result<T>(T value) => (string input) => Result(value, input);
 
-    public static Parser<char> Item = (string input) =>
-        input.ToCharArray() switch
+    private static IEnumerable<(char, string)> ItemM(string input)
+    {
+        foreach (var c in input)
         {
-            [] => Empty<char>(),
-            [var x, .. var xs] => new List<(char, string)> { (x, new string(xs)) }
-        };
+            yield return (c, input.Substring(1));
+            yield break;
+        }
+    }
+
+    public static Parser<char> Item = ItemM;
 
     public static Parser<U> Map<T, U>(this Parser<T> parser, Func<T, U> func) =>
         (string input) => parser(input).Select(res => (func(res.Item1), res.Item2));
@@ -25,15 +34,12 @@ public static class Parser
         (string input) => parser(input).SelectMany(res => func(res.Item1)(res.Item2));
 
     public static Parser<(T, U)> Seq<T, U>(this Parser<T> parser1, Parser<U> parser2) =>
-        parser1.Bind(x => parser2.Bind(y => Result((x, y))));
+        Bind(parser1, x => Bind(parser2, y => Result((x, y))));
 
     public static Parser<T> Sat<T>(this Parser<T> parser, Predicate<T> predicate) =>
-        parser.Bind(x => predicate(x) ? Result(x) : Zero<T>());
+        Bind(parser, x => predicate(x) ? Result(x) : Zero<T>);
 
-    public static Parser<char> Sat(Predicate<char> predicate) =>
-        from x in Item
-        where predicate(x)
-        select x;
+    public static Parser<char> Sat(Predicate<char> predicate) => Sat(ItemM, predicate);
 
     public static Parser<char> Char(char x) => Sat(y => x == y);
 
@@ -62,11 +68,6 @@ public static class Parser
                 select new string(xs.Prepend(x).ToArray())
         };
 
-    public static Parser<IEnumerable<T>> Many<T>(this Parser<T> parser) =>
-        (from x in parser from xs in parser.Many() select xs.Prepend(x)).Plus(
-            Result(Enumerable.Empty<T>())
-        );
-
     public static Parser<IEnumerable<T>> Many1<T>(this Parser<T> parser) =>
         from x in parser
         from xs in parser.Many()
@@ -75,4 +76,23 @@ public static class Parser
     public static Parser<int> Nat = from xs in Digit.Many1() select int.Parse(xs.ToArray());
 
     public static Parser<int> Int = (from _ in Char('-') from n in Nat select -n).Plus(Nat);
+
+    public static Parser<IEnumerable<T>> SepBy1<T, U>(this Parser<T> parser, Parser<U> separator) =>
+        from x in parser
+        from xs in Many(from s in separator from y in parser select y)
+        select xs.Prepend(x);
+
+    public static Parser<U> Bracket<T, U, V>(Parser<T> open, Parser<U> parser, Parser<V> close) =>
+        from o in open
+        from x in parser
+        from c in close
+        select x;
+
+    public static Parser<IEnumerable<T>> SepBy<T, U>(this Parser<T> parser, Parser<U> separator) =>
+        parser.SepBy1(separator).Plus(Result(Enumerable.Empty<T>()));
+
+    public static Parser<IEnumerable<T>> Many<T>(this Parser<T> parser) =>
+        (from x in parser from xs in parser.Many() select xs.Prepend(x)).Plus(
+            Result(Enumerable.Empty<T>())
+        );
 }
