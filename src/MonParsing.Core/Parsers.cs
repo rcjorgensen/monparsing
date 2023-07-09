@@ -16,7 +16,7 @@ public static class Parsers
 
     public static Parser<T> Result<T>(T value) => (string input) => Result(value, input);
 
-    private static IEnumerable<(char, string)> ItemM(string input)
+    public static IEnumerable<(char, string)> Item(string input)
     {
         foreach (var c in input)
         {
@@ -24,8 +24,6 @@ public static class Parsers
             yield break;
         }
     }
-
-    public static Parser<char> Item = ItemM;
 
     public static Parser<U> Map<T, U>(this Parser<T> parser, Func<T, U> func) =>
         (string input) => parser(input).Select(res => (func(res.Item1), res.Item2));
@@ -39,7 +37,7 @@ public static class Parsers
     public static Parser<T> Sat<T>(this Parser<T> parser, Predicate<T> predicate) =>
         Bind(parser, x => predicate(x) ? Result(x) : Zero<T>);
 
-    public static Parser<char> Sat(Predicate<char> predicate) => Sat(ItemM, predicate);
+    public static Parser<char> Sat(Predicate<char> predicate) => Sat(Item, predicate);
 
     public static Parser<char> Char(char x) => Sat(y => x == y);
 
@@ -106,10 +104,10 @@ public static class Parsers
         select x;
 
     public static Parser<IEnumerable<T>> SepBy<T, U>(this Parser<T> parser, Parser<U> separator) =>
-        parser.SepBy1(separator).Plus(Result(Enumerable.Empty<T>()));
+        parser.SepBy1(separator).PlusD(Result(Enumerable.Empty<T>()));
 
     public static Parser<IEnumerable<T>> Many<T>(this Parser<T> parser) =>
-        (from x in parser from xs in parser.Many() select xs.Prepend(x)).Plus(
+        (from x in parser from xs in parser.Many() select xs.Prepend(x)).PlusD(
             Result(Enumerable.Empty<T>())
         );
 
@@ -127,4 +125,34 @@ public static class Parsers
 
     public static Parser<T> PlusD<T>(this Parser<T> parser1, Parser<T> parser2) =>
         parser1.Plus(parser2).First();
+
+    private static bool IsSpace(char ch) => ch == ' ' || ch == '\n' || ch == '\t';
+
+    public static Parser<Unit> Spaces = from x in Sat(IsSpace).Many1() select Unit.Instance;
+
+    public static Parser<Unit> Junk = from x in Spaces.Many() select Unit.Instance;
+
+    public static Parser<T> Parse<T>(this Parser<T> parser) =>
+        from x in Junk
+        from v in parser
+        select v;
+
+    public static Parser<T> Token<T>(this Parser<T> parser) =>
+        from v in parser
+        from x in Junk
+        select v;
+
+    public static Parser<int> Natural = Nat.Token();
+
+    public static Parser<int> Integer = Int.Token();
+
+    public static Parser<string> Symbol(string symbol) => String(symbol).Token();
+
+    public static Parser<string> Ident =
+        from x in Lower
+        from xs in Alphanum.Many()
+        select new string(xs.Prepend(x).ToArray());
+
+    public static Parser<string> Identifier(string[] keywords) =>
+        (from x in Ident where !keywords.Contains(x) select x).Token();
 }
