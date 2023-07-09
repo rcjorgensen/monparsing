@@ -1,9 +1,13 @@
+using System.Diagnostics;
 using FluentAssertions;
 
 namespace MonParsing.Core.Tests;
 
 public class ParsersTests
 {
+    [Fact]
+    public void Zero_never_parses() => Parsers.Zero<char>("foo").Should().BeEmpty();
+
     [Fact]
     public void Result_does_not_consume_from_input_and_returns_given_value() =>
         Parsers.Result("foo")("bar").Should().Equal(("foo", "bar"));
@@ -119,4 +123,43 @@ public class ParsersTests
     [Fact]
     public void Int_parses_negative_number() =>
         Parsers.Int("-10").Should().Equal((-10, ""), (-1, "0"));
+
+    [Fact]
+    public void PlusD_short_circuits()
+    {
+        IEnumerable<(string, string)> ThrowingParser(string input)
+        {
+            throw new UnreachableException();
+        }
+
+        Parser<string> colour = Parsers.String("yellow").PlusD(ThrowingParser);
+
+        colour("yellow").ToList().Should().Equal(("yellow", ""));
+    }
+
+    [Fact]
+    public void PlusD_calls_second_parser_when_first_does_not_parse_input()
+    {
+        Parser<string> colour = Parsers.String("yellow").PlusD(Parsers.String("orange"));
+
+        colour("orange").ToList().Should().Equal(("orange", ""));
+    }
+
+    [Fact]
+    public void Plus_does_not_short_circut()
+    {
+        var expectedMessage = "This exception should be thrown";
+        IEnumerable<(string, string)> ThrowingParser(string input)
+        {
+            throw new InvalidOperationException(expectedMessage);
+        }
+
+        Parser<string> colour = Parsers.String("yellow").Plus(ThrowingParser);
+
+        colour
+            .Invoking(p => p("yellow").ToList())
+            .Should()
+            .Throw<InvalidOperationException>()
+            .WithMessage(expectedMessage);
+    }
 }

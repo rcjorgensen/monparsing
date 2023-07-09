@@ -49,8 +49,25 @@ public static class Parsers
 
     public static Parser<char> Upper = Sat(x => 'A' <= x && x <= 'Z');
 
+    public static IEnumerable<(T, string)> Plus<T>(
+        Parser<T> parser1,
+        Parser<T> parser2,
+        string input
+    )
+    {
+        foreach (var item in parser1(input))
+        {
+            yield return item;
+        }
+
+        foreach (var item in parser2(input))
+        {
+            yield return item;
+        }
+    }
+
     public static Parser<T> Plus<T>(this Parser<T> parser1, Parser<T> parser2) =>
-        (string input) => parser1(input).Concat(parser2(input));
+        (string input) => Plus(parser1, parser2, input);
 
     public static Parser<char> Letter = Lower.Plus(Upper);
 
@@ -95,4 +112,19 @@ public static class Parsers
         (from x in parser from xs in parser.Many() select xs.Prepend(x)).Plus(
             Result(Enumerable.Empty<T>())
         );
+
+    private static IEnumerable<(T, string)> First<T>(Parser<T> parser, string input)
+    {
+        foreach (var item in parser(input))
+        {
+            yield return item;
+            yield break;
+        }
+    }
+
+    public static Parser<T> First<T>(this Parser<T> parser) =>
+        (string input) => First(parser, input);
+
+    public static Parser<T> PlusD<T>(this Parser<T> parser1, Parser<T> parser2) =>
+        parser1.Plus(parser2).First();
 }
