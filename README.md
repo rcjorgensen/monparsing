@@ -1,8 +1,8 @@
 # MonParsing
 C# library for writing any parser using monadic parser combinators and LINQ syntax.
 
-![Nuget](https://img.shields.io/nuget/v/MonParsing)
-![Nuget](https://img.shields.io/nuget/dt/MonParsing)
+![Nuget](https://img.shields.io/nuget/v/MonParsing?link=https%3A%2F%2Fwww.nuget.org%2Fpackages%2FMonParsing)
+![Nuget](https://img.shields.io/nuget/dt/MonParsing?link=https%3A%2F%2Fwww.nuget.org%2Fpackages%2FMonParsing)
 
 ```csharp
 using MonParsing.Core;
@@ -18,7 +18,7 @@ public static class SemVer
 
     public static Parser<string> ZeroDigit = 
         from z in Char('0') 
-        select z. ToString();
+        select z.ToString();
 
     private static Parser<string> Digit = ZeroDigit.Or(PositiveDigit);
 
