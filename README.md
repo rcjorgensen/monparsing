@@ -8,7 +8,7 @@ C# library for writing any parser using monadic parser combinators and LINQ synt
 using MonParsing.Core;
 using static MonParsing.Core.Parsers;
 
-// Example of simiplified SemVer parser
+// Example of simplified SemVer parser
 // https://semver.org/
 public static class SemVer
 {
