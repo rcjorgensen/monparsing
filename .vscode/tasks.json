@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/tests/MonParsing.Core.Tests/MonParsing.Core.Tests.csproj",
+                "${workspaceFolder}/src/MonParsing.Examples/MonParsing.Examples.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/tests/MonParsing.Core.Tests/MonParsing.Core.Tests.csproj",
+                "${workspaceFolder}/src/MonParsing.Examples/MonParsing.Examples.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/tests/MonParsing.Core.Tests/MonParsing.Core.Tests.csproj"
+                "${workspaceFolder}/src/MonParsing.Examples/MonParsing.Examples.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
