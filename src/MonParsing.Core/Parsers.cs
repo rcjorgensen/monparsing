@@ -134,21 +134,27 @@ public static class Parsers
         from chs in parser
         select string.Concat(chs);
 
+    public static Parser<string> Convert(this Parser<char> parser) =>
+        from ch in parser
+        select ch.ToString();
+
     public static Parser<string> String(string str) => str.For(ch => Char(ch)).Convert();
 
     //
     // Some useful everyday parsers
     //
 
-    public static Parser<char> Digit = Sat(x => '0' <= x && x <= '9');
+    public static Parser<char> PositiveDigit = Sat(x => '1' <= x && x <= '9');
+
+    public static Parser<char> Digit = Char('0').Or(PositiveDigit);
 
     public static Parser<char> Lower = Sat(x => 'a' <= x && x <= 'z');
 
     public static Parser<char> Upper = Sat(x => 'A' <= x && x <= 'Z');
 
-    public static Parser<char> Letter = Lower.Plus(Upper);
+    public static Parser<char> Letter = Lower.Or(Upper);
 
-    public static Parser<char> Alphanumeric = Letter.Plus(Digit);
+    public static Parser<char> Alphanumeric = Letter.Or(Digit);
 
     public static Parser<int> PositiveInteger =
         from ds in OneOrMore(Digit)

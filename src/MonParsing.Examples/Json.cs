@@ -1,13 +1,13 @@
 using MonParsing.Core;
 using static MonParsing.Core.Parsers;
 
-namespace MonParsing.Examples.JsonParser;
+namespace MonParsing.Examples;
 
 public static class Json
 {
     private static Parser<Unit> Whitespace =
         from w in ZeroOrMore(Sat(c => c == ' ' || c == '\n' || c == '\r' || c == '\t'))
-        select Unit.Instance;
+        select Unit.unit;
 
     private static Parser<T> Token<T>(Parser<T> parser) =>
         from p in parser
@@ -92,5 +92,5 @@ public static class Json
             select new JArray { Value = vs }
         );
 
-    public static Parser<JObject> Parser = from w in Whitespace from json in JObject select json;
+    public static Parser<JObject> Parse = from w in Whitespace from json in JObject select json;
 }

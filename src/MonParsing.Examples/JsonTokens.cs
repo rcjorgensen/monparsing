@@ -1,6 +1,4 @@
-using MonParsing.Core;
-
-namespace MonParsing.Examples.JsonParser;
+namespace MonParsing.Examples;
 
 public abstract record JToken { }
 
