@@ -1,29 +1,51 @@
-﻿namespace MonParsing.Core;
+﻿using static MonParsing.Core.Result;
 
-public delegate IEnumerable<IParseResult<T>> Parser<out T>(string input);
+namespace MonParsing.Core;
+
+public delegate IResult<IParseResult<T>> Parser<out T>(string input);
 
 public static class Parsers
 {
-    public static IEnumerable<IParseResult<T>> Zero<T>(string input)
+    public static IResult<IParseResult<T>> Zero<T>(string input)
     {
-        yield break;
+        var maxLength = 10;
+        var inputTruncated =
+            input.Length > maxLength ? input.Substring(0, maxLength) + "..." : input;
+
+        var error = $"Invalid input: {inputTruncated}";
+
+        return Error<IParseResult<T>>(error);
     }
 
-    private static IEnumerable<IParseResult<T>> Result<T>(T value, string input)
-    {
-        yield return ParseResult.Default(value, input);
-    }
+    public static Parser<T> Result<T>(T value) =>
+        (string input) =>
+        {
+            return Ok(ParseResult.Of(value, input));
+        };
 
-    public static Parser<T> Result<T>(T value) => (string input) => Result(value, input);
+    public static Parser<U> Map<T, U>(this Parser<T> parser, Func<T, U> selector) =>
+        (string input) => from pr in parser(input) select (from r in pr select selector(r));
 
-    public static Parser<U> Map<T, U>(this Parser<T> parser, Func<T, U> func) =>
-        (string input) => parser(input).Select(res => res.Map(func));
+    public static Parser<U> AndThen<T, U>(this Parser<T> parser, Func<T, Parser<U>> selector) =>
+        (string input) =>
+            from pr1 in parser(input)
+            from pr2 in selector(pr1.Result)(pr1.Input)
+            select pr2;
 
-    public static Parser<U> Bind<T, U>(this Parser<T> parser, Func<T, Parser<U>> func) =>
-        (string input) => parser(input).SelectMany(res => func(res.Result)(res.Input));
+    public static Parser<U> And<T, U>(this Parser<T> parser1, Parser<U> parser2) =>
+        (string input) => from pr1 in parser1(input) from pr2 in parser2(pr1.Input) select pr2;
 
     public static Parser<T> Sat<T>(this Parser<T> parser, Predicate<T> predicate) =>
-        Bind(parser, x => predicate(x) ? Result(x) : Zero<T>);
+        (string input) =>
+        {
+            var result = parser(input);
+            if (result.Value != null && predicate(result.Value.Result))
+            {
+                return Ok(ParseResult.Of(result.Value.Result, result.Value.Input));
+            }
+
+            return Zero<T>(input);
+        };
 
     public static Parser<IEnumerable<U>> For<T, U>(
         this IEnumerable<T> collection,
@@ -33,30 +55,10 @@ public static class Parsers
         var result = Result(Enumerable.Empty<U>());
         foreach (var item in collection)
         {
-            result = Bind(result, xs => Bind(func(item), x => Result(xs.Append(x))));
+            result = AndThen(result, xs => AndThen(func(item), x => Result(xs.Append(x))));
         }
         return result;
     }
-
-    private static IEnumerable<IParseResult<T>> Plus<T>(
-        Parser<T> parser1,
-        Parser<T> parser2,
-        string input
-    )
-    {
-        foreach (var item in parser1(input))
-        {
-            yield return item;
-        }
-
-        foreach (var item in parser2(input))
-        {
-            yield return item;
-        }
-    }
-
-    public static Parser<T> Plus<T>(this Parser<T> parser1, Parser<T> parser2) =>
-        (string input) => Plus(parser1, parser2, input);
 
     // TODO: Rewrite without recursion
     public static Parser<IEnumerable<T>> ZeroOrMore<T>(Parser<T> parser) =>
@@ -88,20 +90,18 @@ public static class Parsers
         Parser<U> separator
     ) => parser.OneOrMoreSeparated(separator).Or(Result(Enumerable.Empty<T>()));
 
-    private static IEnumerable<IParseResult<T>> First<T>(Parser<T> parser, string input)
-    {
-        foreach (var item in parser(input))
-        {
-            yield return item;
-            yield break;
-        }
-    }
-
-    public static Parser<T> First<T>(this Parser<T> parser) =>
-        (string input) => First(parser, input);
-
     public static Parser<T> Or<T>(this Parser<T> parser1, Parser<T> parser2) =>
-        parser1.Plus(parser2).First();
+        (string input) =>
+        {
+            var result1 = parser1(input);
+
+            if (result1.Value != null)
+            {
+                return result1;
+            }
+
+            return parser2(input);
+        };
 
     public static Parser<T> Or<T>(Parser<T> parser1, params Parser<T>[] parsers)
     {
@@ -117,14 +117,16 @@ public static class Parsers
     // Useful `char` and `string` parsers
     //
 
-    public static IEnumerable<IParseResult<char>> Item(string input)
-    {
-        foreach (var c in input)
+    public static Parser<char> Item =>
+        (string input) =>
         {
-            yield return ParseResult.Default(c, input.Substring(1));
-            yield break;
-        }
-    }
+            foreach (var c in input)
+            {
+                return Ok(ParseResult.Of(c, input.Substring(1)));
+            }
+
+            return Error<IParseResult<char>>("Empty input");
+        };
 
     public static Parser<char> Sat(Predicate<char> predicate) => Sat(Item, predicate);
 

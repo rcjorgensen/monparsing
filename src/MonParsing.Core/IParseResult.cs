@@ -5,9 +5,13 @@ public interface IParseResult<out T>
     T Result { get; }
 
     string Input { get; }
+
+    IParseResult<U> Map<U>(Func<T, U> selector);
+
+    IParseResult<U> AndThen<U>(Func<T, IParseResult<U>> selector);
 }
 
-public record ParseResult<T> : IParseResult<T>
+internal record ParseResult<T> : IParseResult<T>
 {
     public ParseResult(T result, string input)
     {
@@ -18,13 +22,15 @@ public record ParseResult<T> : IParseResult<T>
     public T Result { get; }
 
     public string Input { get; }
+
+    public IParseResult<U> AndThen<U>(Func<T, IParseResult<U>> selector) =>
+        ParseResult.Of(selector(Result).Result, Input);
+
+    public IParseResult<U> Map<U>(Func<T, U> selector) => ParseResult.Of(selector(Result), Input);
 }
 
 public static class ParseResult
 {
-    public static IParseResult<T> Default<T>(T result, string input) =>
+    public static IParseResult<T> Of<T>(T result, string input) =>
         new ParseResult<T>(result, input);
-
-    public static IParseResult<U> Map<T, U>(this IParseResult<T> parseResult, Func<T, U> func) =>
-        Default(func(parseResult.Result), parseResult.Input);
 }

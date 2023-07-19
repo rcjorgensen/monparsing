@@ -1,41 +1,45 @@
 using System.Diagnostics;
 using FluentAssertions;
+using static MonParsing.Core.Parsers;
+using static MonParsing.Core.Result;
 
 namespace MonParsing.Core.Tests;
 
 public class ParsersTests
 {
-    private static Parser<char> Item = Parsers.Item;
-
     [Fact]
-    public void Zero_never_parses() => Parsers.Zero<char>("foo").Should().BeEmpty();
+    public void Zero_never_parses() =>
+        Zero<char>("foo").Should().BeEquivalentTo(Error<IParseResult<char>>("Invalid input: foo"));
 
     [Fact]
     public void Result_does_not_consume_from_input_and_returns_given_value() =>
-        Parsers.Result("foo")("bar").Should().Equal(ParseResult.Default("foo", "bar"));
+        Result("foo")("bar").Should().BeEquivalentTo(Ok(ParseResult.Of("foo", "bar")));
 
     [Fact]
-    public void Item_does_not_parse_empty_input() => Parsers.Item("").Should().BeEmpty();
+    public void Item_does_not_parse_empty_input() =>
+        Item("").Should().BeEquivalentTo(Error<IParseResult<char>>("Empty input"));
 
     [Fact]
     public void Item_parses_first_item() =>
-        Parsers.Item("foo").Should().Equal(ParseResult.Default('f', "oo"));
+        Item("foo").Should().BeEquivalentTo(Ok(ParseResult.Of('f', "oo")));
 
     [Fact]
     public void Sat_does_not_parse_input_when_predicate_is_not_satisfied() =>
-        Parsers.Sat(c => c == 'f')("bar").Should().BeEmpty();
+        Sat(c => c == 'f')("bar")
+            .Should()
+            .BeEquivalentTo(Error<IParseResult<char>>("Invalid input: bar"));
 
     [Fact]
     public void Sat_parses_input_when_predicate_is_satisfied() =>
-        Parsers.Sat(c => c == 'f')("foo").Should().Equal(ParseResult.Default('f', "oo"));
+        Sat(c => c == 'f')("foo").Should().BeEquivalentTo(Ok(ParseResult.Of('f', "oo")));
 
     [Fact]
     public void Char_does_not_parse_input_when_first_char_does_not_match() =>
-        Parsers.Char('f')("bar").Should().BeEmpty();
+        Char('f')("bar").Should().BeEquivalentTo(Error<IParseResult<char>>("Invalid input: bar"));
 
     [Fact]
     public void Char_parses_input_when_first_char_matches() =>
-        Parsers.Char('f')("foo").Should().Equal(ParseResult.Default('f', "oo"));
+        Char('f')("foo").Should().BeEquivalentTo(Ok(ParseResult.Of('f', "oo")));
 
     [Theory]
     [InlineData("0")]
@@ -49,107 +53,94 @@ public class ParsersTests
     [InlineData("8")]
     [InlineData("9")]
     public void Digit_parses_digits_from_0_to_9(string digit) =>
-        Parsers.Digit(digit).Should().Equal(ParseResult.Default(Convert.ToChar(digit), ""));
+        Digit(digit).Should().BeEquivalentTo(Ok(ParseResult.Of(Convert.ToChar(digit), "")));
 
     [Fact]
-    public void Digit_does_not_parse_non_digit() => Parsers.Digit("foo").Should().BeEmpty();
+    public void Digit_does_not_parse_non_digit() =>
+        Digit("foo").Should().BeEquivalentTo(Error<IParseResult<char>>("Invalid input: foo"));
 
     [Fact]
-    public void Lower_does_not_parse_non_letter() => Parsers.Lower("_oo").Should().BeEmpty();
+    public void Lower_does_not_parse_non_letter() =>
+        Lower("_oo").Should().BeEquivalentTo(Error<IParseResult<char>>("Invalid input: _oo"));
 
     [Fact]
     public void Lower_does_not_parse_upper_case_character() =>
-        Parsers.Lower("Foo").Should().BeEmpty();
+        Lower("Foo").Should().BeEquivalentTo(Error<IParseResult<char>>("Invalid input: Foo"));
 
     [Fact]
     public void Lower_parses_lower_case_character() =>
-        Parsers.Lower("foo").Should().Equal(ParseResult.Default('f', "oo"));
+        Lower("foo").Should().BeEquivalentTo(Ok(ParseResult.Of('f', "oo")));
 
     [Fact]
-    public void Lower_parses_a() => Parsers.Lower("a").Should().Equal(ParseResult.Default('a', ""));
+    public void Lower_parses_a() => Lower("a").Should().BeEquivalentTo(Ok(ParseResult.Of('a', "")));
 
     [Fact]
-    public void Lower_parses_z() => Parsers.Lower("z").Should().Equal(ParseResult.Default('z', ""));
+    public void Lower_parses_z() => Lower("z").Should().BeEquivalentTo(Ok(ParseResult.Of('z', "")));
 
     [Fact]
-    public void Upper_does_not_parse_non_letter() => Parsers.Upper("_oo").Should().BeEmpty();
+    public void Upper_does_not_parse_non_letter() =>
+        Upper("_oo").Should().BeEquivalentTo(Error<IParseResult<char>>("Invalid input: _oo"));
 
     [Fact]
     public void Upper_does_not_parse_lower_case_character() =>
-        Parsers.Upper("foo").Should().BeEmpty();
+        Upper("foo").Should().BeEquivalentTo(Error<IParseResult<char>>("Invalid input: foo"));
 
     [Fact]
     public void Upper_parses_upper_case_character() =>
-        Parsers.Upper("Foo").Should().Equal(ParseResult.Default('F', "oo"));
+        Upper("Foo").Should().BeEquivalentTo(Ok(ParseResult.Of('F', "oo")));
 
     [Fact]
-    public void Upper_parses_A() => Parsers.Upper("A").Should().Equal(ParseResult.Default('A', ""));
+    public void Upper_parses_A() => Upper("A").Should().BeEquivalentTo(Ok(ParseResult.Of('A', "")));
 
     [Fact]
-    public void Upper_parses_Z() => Parsers.Upper("Z").Should().Equal(ParseResult.Default('Z', ""));
+    public void Upper_parses_Z() => Upper("Z").Should().BeEquivalentTo(Ok(ParseResult.Of('Z', "")));
 
     [Fact]
     public void String_of_empty_string_parses_empty_input() =>
-        Parsers.String("")("").Should().Equal(ParseResult.Default("", ""));
+        String("")("").Should().BeEquivalentTo(Ok(ParseResult.Of("", "")));
 
     [Fact]
     public void String_parses_input_that_matches() =>
-        Parsers
-            .String("hello")("hello world")
+        String("hello")("hello world")
             .Should()
-            .Equal(ParseResult.Default("hello", " world"));
+            .BeEquivalentTo(Ok(ParseResult.Of("hello", " world")));
 
     [Fact]
     public void String_does_not_parse_input_that_does_not_match() =>
-        Parsers.String("hello")("helicopter").Should().BeEmpty();
+        String("hello")("helicopter123456")
+            .Should()
+            .BeEquivalentTo(Error<IParseResult<char>>("Invalid input: icopter123..."));
 
     [Fact]
-    public void Integer_does_not_parse_non_integer() => Parsers.Integer("foo").Should().BeEmpty();
+    public void Integer_does_not_parse_non_integer() =>
+        Integer("foo").Should().BeEquivalentTo(Error<IParseResult<char>>("Invalid input: foo"));
 
     [Fact]
     public void Integer_parses_positive_number() =>
-        Parsers.Integer("10").Should().Equal(ParseResult.Default(10, ""));
+        Integer("10").Should().BeEquivalentTo(Ok(ParseResult.Of(10, "")));
 
     [Fact]
     public void Integer_parses_negative_number() =>
-        Parsers.Integer("-10").Should().Equal(ParseResult.Default(-10, ""));
+        Integer("-10").Should().BeEquivalentTo(Ok(ParseResult.Of(-10, "")));
 
     [Fact]
     public void Or_short_circuits()
     {
-        IEnumerable<IParseResult<string>> ThrowingParser(string input)
+        IResult<IParseResult<string>> ThrowingParser(string input)
         {
             throw new UnreachableException();
         }
 
-        Parser<string> colour = Parsers.String("yellow").Or(ThrowingParser);
+        Parser<string> colour = String("yellow").Or(ThrowingParser);
 
-        colour("yellow").ToList().Should().Equal(ParseResult.Default("yellow", ""));
+        colour("yellow").Should().BeEquivalentTo(Ok(ParseResult.Of("yellow", "")));
     }
 
     [Fact]
     public void Or_calls_second_parser_when_first_does_not_parse_input()
     {
-        Parser<string> colour = Parsers.String("yellow").Or(Parsers.String("orange"));
+        Parser<string> colour = String("yellow").Or(String("orange"));
 
-        colour("orange").ToList().Should().Equal(ParseResult.Default("orange", ""));
-    }
-
-    [Fact]
-    public void Plus_does_not_short_circut()
-    {
-        var expectedMessage = "This exception should be thrown";
-        IEnumerable<IParseResult<string>> ThrowingParser(string input)
-        {
-            throw new InvalidOperationException(expectedMessage);
-        }
-
-        Parser<string> colour = Parsers.String("yellow").Plus(ThrowingParser);
-
-        colour
-            .Invoking(p => p("yellow").ToList())
-            .Should()
-            .Throw<InvalidOperationException>()
-            .WithMessage(expectedMessage);
+        colour("orange").Should().BeEquivalentTo(Ok(ParseResult.Of("orange", "")));
     }
 }
