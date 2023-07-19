@@ -45,11 +45,13 @@ public static class SemVer
     public static Parser<string> Parse = VersionCore;
 }
 
-// Parses a valid SemVer
-IParseResult<string> valid = SemVer.Parse("1.2.3").First(); 
+// Parses a valid SemVer in this case just returning the input
+IResult<IParseResult<string>> valid = SemVer.Parse("1.2.3"); 
+// { Value: "1.2.3", Error: null }
 
-// Returns an empty result since leading zeros are not allowed
-IEnumerable<IParseResult<string>> invalid = SemVer.Parse("00.1.0"); 
+// Returns an error result since leading zeros are not allowed
+IResult<IParseResult<string>> invalid = SemVer.Parse("00.1.0");
+// { Value: null, Error: "Invalid input: 00.1.0" }
 ```
 
 # Acknowledgements
