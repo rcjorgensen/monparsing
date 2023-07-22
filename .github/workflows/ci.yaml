@@ -1,41 +1,47 @@
 name: CI
+
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
   pull_request:
-    branches:
-      - main
+    branches: ["main"]
+
 jobs:
-  check_formatting:
+  formatting:
     runs-on: ubuntu-latest
-    name: Check formatting
+
     steps:
       - uses: actions/checkout@v3
-      - run: |
-          dotnet tool restore
-          dotnet csharpier --check .
+      - name: Restore tools
+        run: dotnet tool restore
+      - name: Check formatting
+        run: dotnet csharpier --check .
+
   build:
     runs-on: ubuntu-latest
-    name: Build and test
+
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 7.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-  mutation_test:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+
+  mutate:
     runs-on: ubuntu-latest
-    name: Mutate
+
     steps:
-    - uses: actions/checkout@v3
-    - run: |
-        dotnet tool restore
-        dotnet stryker --reporter "cleartext"
-        
+      - shell: bash
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
+      - uses: actions/checkout@v3
+      - name: Restore tools
+        run: dotnet tool restore
+      - name: Run Stryker
+        run: dotnet stryker --reporter "dashboard" --dashboard-api-key "$STRYKER_DASHBOARD_API_KEY"
