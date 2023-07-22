@@ -37,11 +37,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - shell: bash
-        env:
-          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
       - uses: actions/checkout@v3
       - name: Restore tools
         run: dotnet tool restore
       - name: Run Stryker
+        shell: bash
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
         run: dotnet stryker --reporter "dashboard" --dashboard-api-key "$STRYKER_DASHBOARD_API_KEY"
