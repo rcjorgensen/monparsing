@@ -1,8 +1,10 @@
 # MonParsing
+
 C# library for writing any parser using monadic parser combinators and LINQ syntax.
 
 [![Nuget](https://img.shields.io/nuget/v/MonParsing)](https://www.nuget.org/packages/MonParsing)
 [![Nuget](https://img.shields.io/nuget/dt/MonParsing)](https://www.nuget.org/packages/MonParsing)
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Frcjorgensen%2Fmonparsing-csharp%2Fmain)](https://dashboard.stryker-mutator.io/reports/github.com/rcjorgensen/monparsing-csharp/main)
 
 ```csharp
 using MonParsing.Core;
@@ -16,8 +18,8 @@ public static class SemVer
         from d in Sat(x => '1' <= x && x <= '9')
         select d.ToString();
 
-    public static Parser<string> ZeroDigit = 
-        from z in Char('0') 
+    public static Parser<string> ZeroDigit =
+        from z in Char('0')
         select z.ToString();
 
     private static Parser<string> Digit = ZeroDigit.Or(PositiveDigit);
@@ -27,7 +29,7 @@ public static class SemVer
         from ds in OneOrMore(Digit)
         select p + ds;
 
-    private static Parser<string> NumericIdentifier = 
+    private static Parser<string> NumericIdentifier =
         Digit.Or(DigitsWithoutLeadingZero);
 
     private static Parser<char> Dot = Char('.');
@@ -46,7 +48,7 @@ public static class SemVer
 }
 
 // Parses a valid SemVer in this case just returning the input
-IResult<IParseResult<string>> valid = SemVer.Parse("1.2.3"); 
+IResult<IParseResult<string>> valid = SemVer.Parse("1.2.3");
 // { Value: "1.2.3", Error: null }
 
 // Returns an error result since leading zeros are not allowed
@@ -55,4 +57,5 @@ IResult<IParseResult<string>> invalid = SemVer.Parse("00.1.0");
 ```
 
 # Acknowledgements
+
 This library is based on https://www.cs.nott.ac.uk/~pszgmh/monparsing.pdf
