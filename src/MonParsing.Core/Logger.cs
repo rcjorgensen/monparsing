@@ -2,7 +2,20 @@ namespace MonParsing.Core;
 
 using static Unit;
 
-public class Logger<T>
+public interface ILogger<out T>
+{
+    IEnumerable<string> Logs { get; }
+
+    T Value { get; }
+
+    ILogger<U> Map<U>(Func<T, U> selector);
+
+    ILogger<U> AndThen<U>(Func<T, ILogger<U>> selector);
+
+    ILogger<U> And<U>(ILogger<U> other);
+}
+
+internal class Logger<T> : ILogger<T>
 {
     public IEnumerable<string> Logs { get; }
 
@@ -13,23 +26,29 @@ public class Logger<T>
         Logs = logs;
         Value = value;
     }
+
+    public Logger(string log, T value)
+        : this(new string[] { log }, value) { }
+
+    public Logger(T value)
+        : this(Enumerable.Empty<string>(), value) { }
+
+    public ILogger<U> Map<U>(Func<T, U> selector) => new Logger<U>(Logs, selector(Value));
+
+    public ILogger<U> AndThen<U>(Func<T, ILogger<U>> selector)
+    {
+        var next = selector(Value);
+        return new Logger<U>(Logs.Concat(next.Logs), next.Value);
+    }
+
+    public ILogger<U> And<U>(ILogger<U> other) => new Logger<U>(Logs.Concat(Logs), other.Value);
 }
 
 public static class Logger
 {
-    public static Logger<T> NoMsg<T>(T value) => new Logger<T>(Enumerable.Empty<string>(), value);
+    public static ILogger<T> NoMsg<T>(T value) => new Logger<T>(value);
 
-    public static Logger<T> Annotate<T>(string log, T value) =>
-        new Logger<T>(new string[] { log }, value);
+    public static ILogger<T> Annotate<T>(string log, T value) => new Logger<T>(log, value);
 
-    public static Logger<Unit> Msg(string log) => new Logger<Unit>(new string[] { log }, unit);
-
-    public static Logger<U> AndThen<T, U>(this Logger<T> logger, Func<T, Logger<U>> func)
-    {
-        var next = func(logger.Value);
-        return new Logger<U>(logger.Logs.Concat(next.Logs), next.Value);
-    }
-
-    public static Logger<U> And<T, U>(this Logger<T> logger1, Logger<U> logger2) =>
-        new Logger<U>(logger1.Logs.Concat(logger2.Logs), logger2.Value);
+    public static ILogger<Unit> Msg(string log) => new Logger<Unit>(log, unit);
 }

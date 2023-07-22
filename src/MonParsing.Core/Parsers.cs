@@ -2,8 +2,6 @@
 
 namespace MonParsing.Core;
 
-public delegate IResult<IParseResult<T>> Parser<out T>(string input);
-
 public static class Parsers
 {
     public static IResult<IParseResult<T>> Zero<T>(string input)
@@ -24,7 +22,7 @@ public static class Parsers
         };
 
     public static Parser<U> Map<T, U>(this Parser<T> parser, Func<T, U> selector) =>
-        (string input) => from pr in parser(input) select (from r in pr select selector(r));
+        (string input) => parser(input).Map(pr => pr.Map(selector));
 
     public static Parser<U> AndThen<T, U>(this Parser<T> parser, Func<T, Parser<U>> selector) =>
         (string input) =>
