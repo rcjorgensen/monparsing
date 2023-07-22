@@ -8,6 +8,8 @@ on:
 
 jobs:
   formatting:
+    name: "Check formatting"
+
     runs-on: ubuntu-latest
 
     steps:
@@ -18,6 +20,8 @@ jobs:
         run: dotnet csharpier --check .
 
   build:
+    name: "Build and test"
+
     runs-on: ubuntu-latest
 
     steps:
@@ -34,14 +38,16 @@ jobs:
         run: dotnet test --no-build --verbosity normal
 
   mutate:
+    name: "Run mutation testing"
+
     runs-on: ubuntu-latest
 
     steps:
-      - shell: bash
-        env:
-          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
       - uses: actions/checkout@v3
       - name: Restore tools
         run: dotnet tool restore
-      - name: Run Stryker
+      - name: Run stryker
+        shell: bash
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
         run: dotnet stryker --reporter "dashboard" --dashboard-api-key "$STRYKER_DASHBOARD_API_KEY"
