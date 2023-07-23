@@ -52,14 +52,4 @@ public static class Result
     public static IResult<T> Ok<T>(T value) => new Result<T>(value);
 
     public static IResult<T> Error<T>(string error) => new Result<T>(error);
-
-    public static IResult<T> Or<T>(this IResult<T> result1, IResult<T> result2)
-    {
-        if (result1.Value != null)
-        {
-            return result1;
-        }
-
-        return result2;
-    }
 }
