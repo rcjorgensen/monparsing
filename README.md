@@ -4,7 +4,8 @@ C# library for writing any parser using monadic parser combinators and LINQ synt
 
 [![Nuget](https://img.shields.io/nuget/v/MonParsing)](https://www.nuget.org/packages/MonParsing)
 [![Nuget](https://img.shields.io/nuget/dt/MonParsing)](https://www.nuget.org/packages/MonParsing)
-[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Frcjorgensen%2Fmonparsing-csharp%2Fmain)](https://dashboard.stryker-mutator.io/reports/github.com/rcjorgensen/monparsing-csharp/main)
+[![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/rcjorgensen/monparsing-csharp/ci.yaml?event=push)](https://github.com/rcjorgensen/monparsing-csharp/actions/workflows/ci.yaml)
+[![Mutation testing badge](https://img.shields.io/endpoint?label=mutation%20score&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Frcjorgensen%2Fmonparsing-csharp%2Fmain)](https://dashboard.stryker-mutator.io/reports/github.com/rcjorgensen/monparsing-csharp/main)
 
 ```csharp
 using MonParsing.Core;
