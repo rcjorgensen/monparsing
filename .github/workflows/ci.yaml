@@ -47,6 +47,7 @@ jobs:
       - name: Restore tools
         run: dotnet tool restore
       - name: Run stryker
+        working-directory: ./tests/MonParsing.Core.Tests
         shell: bash
         env:
           STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
