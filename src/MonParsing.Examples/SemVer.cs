@@ -1,5 +1,5 @@
 using MonParsing.Core;
-using static MonParsing.Core.Parsers;
+using static MonParsing.Core.Parser;
 
 namespace MonParsing.Examples;
 

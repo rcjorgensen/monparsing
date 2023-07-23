@@ -56,6 +56,8 @@ IResult<IParseResult<string>> invalid = SemVer.Parse("00.1.0");
 // { Value: null, Error: "Invalid input: 00.1.0" }
 ```
 
+See [the examples library](src/MonParsing.Examples) for more examples.
+
 # Acknowledgements
 
 This library is based on https://www.cs.nott.ac.uk/~pszgmh/monparsing.pdf

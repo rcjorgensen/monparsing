@@ -32,6 +32,20 @@ public static class LinqExtensions
         Func<T, V, U> s
     ) => monad.SelectMany(t => k(t).Select(v => s(t, v)));
 
+    public static ILogger<U> Select<T, U>(this ILogger<T> source, Func<T, U> selector) =>
+        source.Map(selector);
+
+    public static ILogger<U> SelectMany<T, U>(
+        this ILogger<T> source,
+        Func<T, ILogger<U>> selector
+    ) => source.AndThen(selector);
+
+    public static ILogger<U> SelectMany<T, U, V>(
+        this ILogger<T> monad,
+        Func<T, ILogger<V>> k,
+        Func<T, V, U> s
+    ) => monad.SelectMany(t => k(t).Select(v => s(t, v)));
+
     public static Parser<U> Select<T, U>(this Parser<T> source, Func<T, U> selector) =>
         source.Map(selector);
 
@@ -45,5 +59,5 @@ public static class LinqExtensions
     ) => monad.SelectMany(t => k(t).Select(v => s(t, v)));
 
     public static Parser<T> Where<T>(this Parser<T> parser, Predicate<T> predicate) =>
-        parser.Sat(predicate);
+        parser.If(predicate);
 }
