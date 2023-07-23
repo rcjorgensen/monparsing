@@ -19,4 +19,4 @@ jobs:
         shell: bash
         env:
           STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
-        run: dotnet stryker --reporter "dashboard" --dashboard-api-key "$STRYKER_DASHBOARD_API_KEY"
+        run: dotnet stryker --reporter "dashboard" --dashboard-api-key "$STRYKER_DASHBOARD_API_KEY" --version main
