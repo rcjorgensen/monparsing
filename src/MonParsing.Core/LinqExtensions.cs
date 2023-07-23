@@ -43,5 +43,5 @@ public static class LinqExtensions
     ) => monad.SelectMany(t => k(t).Select(v => s(t, v)));
 
     public static Parser<T> Where<T>(this Parser<T> parser, Predicate<T> predicate) =>
-        parser.Sat(predicate);
+        parser.If(predicate);
 }

@@ -6,7 +6,7 @@ namespace MonParsing.Examples;
 public static class Json
 {
     private static Parser<Unit> Whitespace =
-        from w in ZeroOrMore(Sat(c => c == ' ' || c == '\n' || c == '\r' || c == '\t'))
+        from w in ZeroOrMore(If(c => c == ' ' || c == '\n' || c == '\r' || c == '\t'))
         select Unit.unit;
 
     private static Parser<T> Token<T>(Parser<T> parser) =>
@@ -17,7 +17,7 @@ public static class Json
     // Simplified JSON string where escapes are not allowed
     private static Parser<char> DoubleQuote = Char('"');
     private static Parser<string> StringContent =
-        from cs in ZeroOrMore(Sat(c => c != '"' && c != '\\'))
+        from cs in ZeroOrMore(If(c => c != '"' && c != '\\'))
         select string.Concat(cs);
     private static Parser<JString> JString = Token(
         from q1 in DoubleQuote

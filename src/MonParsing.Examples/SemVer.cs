@@ -8,7 +8,7 @@ namespace MonParsing.Examples;
 public static class SemVer
 {
     public static Parser<string> PositiveDigit =
-        from d in Sat(x => '1' <= x && x <= '9')
+        from d in If(x => '1' <= x && x <= '9')
         select d.ToString();
     public static Parser<string> ZeroDigit = from z in Char('0') select z.ToString();
     private static Parser<string> Digit = ZeroDigit.Or(PositiveDigit);

@@ -35,7 +35,7 @@ public static class Parser
     public static Parser<U> And<T, U>(this Parser<T> parser1, Parser<U> parser2) =>
         (string input) => from pr1 in parser1(input) from pr2 in parser2(pr1.Input) select pr2;
 
-    public static Parser<T> Sat<T>(this Parser<T> parser, Predicate<T> predicate) =>
+    public static Parser<T> If<T>(this Parser<T> parser, Predicate<T> predicate) =>
         (string input) =>
         {
             var result = parser(input);
@@ -128,9 +128,9 @@ public static class Parser
             return Error<IParseResult<char>>("Empty input");
         };
 
-    public static Parser<char> Sat(Predicate<char> predicate) => Sat(Item, predicate);
+    public static Parser<char> If(Predicate<char> predicate) => If(Item, predicate);
 
-    public static Parser<char> Char(char x) => Sat(y => x == y);
+    public static Parser<char> Char(char x) => If(y => x == y);
 
     public static Parser<string> Convert(this Parser<IEnumerable<char>> parser) =>
         from chs in parser
@@ -146,13 +146,13 @@ public static class Parser
     // Some useful everyday parsers
     //
 
-    public static Parser<char> PositiveDigit = Sat(x => '1' <= x && x <= '9');
+    public static Parser<char> PositiveDigit = If(x => '1' <= x && x <= '9');
 
     public static Parser<char> Digit = Char('0').Or(PositiveDigit);
 
-    public static Parser<char> Lower = Sat(x => 'a' <= x && x <= 'z');
+    public static Parser<char> Lower = If(x => 'a' <= x && x <= 'z');
 
-    public static Parser<char> Upper = Sat(x => 'A' <= x && x <= 'Z');
+    public static Parser<char> Upper = If(x => 'A' <= x && x <= 'Z');
 
     public static Parser<char> Letter = Lower.Or(Upper);
 
