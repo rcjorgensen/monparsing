@@ -4,7 +4,7 @@ namespace MonParsing.Core;
 
 public delegate IResult<IParseResult<T>> Parser<out T>(string input);
 
-public static class Parsers
+public static class Parser
 {
     public static IResult<IParseResult<T>> Zero<T>(string input)
     {

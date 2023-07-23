@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using FluentAssertions;
-using static MonParsing.Core.Parsers;
+using static MonParsing.Core.Parser;
 using static MonParsing.Core.Result;
 
 namespace MonParsing.Core.Tests;
 
-public class ParsersTests
+public class ParserTests
 {
     [Fact]
     public void Zero_never_parses() =>

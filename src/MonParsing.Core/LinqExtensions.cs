@@ -1,5 +1,3 @@
-using static MonParsing.Core.Result;
-
 namespace MonParsing.Core;
 
 public static class LinqExtensions
