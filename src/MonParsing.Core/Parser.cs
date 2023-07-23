@@ -72,7 +72,7 @@ public static class Parser
         select xs.Prepend(x);
 
     public static Parser<IEnumerable<T>> OneOrMoreSeparated<T, U>(
-        this Parser<T> parser,
+        Parser<T> parser,
         Parser<U> separator
     ) =>
         from x in parser
@@ -88,7 +88,7 @@ public static class Parser
     public static Parser<IEnumerable<T>> ZeroOrMoreSeparated<T, U>(
         Parser<T> parser,
         Parser<U> separator
-    ) => parser.OneOrMoreSeparated(separator).Or(Result(Enumerable.Empty<T>()));
+    ) => OneOrMoreSeparated(parser, separator).Or(Result(Enumerable.Empty<T>()));
 
     public static Parser<T> Or<T>(this Parser<T> parser1, Parser<T> parser2) =>
         (string input) =>
