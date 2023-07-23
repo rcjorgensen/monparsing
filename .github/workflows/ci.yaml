@@ -36,18 +36,3 @@ jobs:
         run: dotnet build --no-restore
       - name: Test
         run: dotnet test --no-build --verbosity normal
-
-  mutate:
-    name: "Run mutation testing"
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Restore tools
-        run: dotnet tool restore
-      - name: Run stryker
-        shell: bash
-        env:
-          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
-        run: dotnet stryker --reporter "dashboard" --dashboard-api-key "$STRYKER_DASHBOARD_API_KEY"

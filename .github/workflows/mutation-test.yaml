@@ -1,0 +1,22 @@
+name: Mutation test
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  mutate:
+    name: "Run mutation testing"
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Restore tools
+        run: dotnet tool restore
+      - name: Run stryker
+        working-directory: ./tests/MonParsing.Core.Tests
+        shell: bash
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
+        run: dotnet stryker --reporter "dashboard" --dashboard-api-key "$STRYKER_DASHBOARD_API_KEY"
