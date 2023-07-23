@@ -1,0 +1,8 @@
+{
+  "stryker-config": {
+    "project-info": {
+      "name": "github.com/rcjorgensen/monparsing-csharp",
+      "version": "main"
+    }
+  }
+}
