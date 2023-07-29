@@ -110,7 +110,7 @@ SemVer.Parser("01.0.0")
 
 # Examples
 
-A list of example parsers can be found in [MonParsing.Examples](https://github.com/rcjorgensen/monparsing/tree/main/src/MonParsing.Examples). In addition to the examples the [tests](https://github.com/rcjorgensen/monparsing/tree/main/tests) are a good place to become familiar with how the library works.
+A number of example parsers can be found in [MonParsing.Examples](https://github.com/rcjorgensen/monparsing/tree/main/src/MonParsing.Examples). In addition to the examples the [tests](https://github.com/rcjorgensen/monparsing/tree/main/tests) are a good place to become familiar with how the library works.
 
 # Acknowledgements
 
