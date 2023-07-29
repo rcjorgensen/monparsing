@@ -9,4 +9,8 @@ public class SemVerTests
 
     [Fact]
     public Task SemVer_parser_does_not_parse_invalid_input() => Verify(SemVer.Parser("01.0.0"));
+
+    [Fact]
+    public Task SemVer_with_pre_release_identifiers_is_valid() =>
+        Verify(SemVer.Parser("1.0.0-alpha.1"));
 }

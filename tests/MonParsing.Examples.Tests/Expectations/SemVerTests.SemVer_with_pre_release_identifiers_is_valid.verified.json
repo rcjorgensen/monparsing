@@ -1,0 +1,20 @@
+﻿{
+  "Value": {
+    "Result": {
+      "VersionCore": {
+        "Major": 1,
+        "Minor": 0,
+        "Patch": 0
+      },
+      "PreRelease": {
+        "Identifiers": [
+          "alpha",
+          "1"
+        ]
+      },
+      "Build": null
+    },
+    "Input": ""
+  },
+  "Error": null
+}
