@@ -35,7 +35,7 @@ public static class Parser
                     predicate(statePair.Result)
                         ? Ok(statePair)
                         : Error<IStatePair<T>>(
-                            $"Expectation: {expectation}, Actual: {statePair.Result}, Input before: {input}, Input after: {statePair.Input}"
+                            $"Expectation: {expectation}, Actual: {statePair.Result}, Input: {input}"
                         )
             );
         };

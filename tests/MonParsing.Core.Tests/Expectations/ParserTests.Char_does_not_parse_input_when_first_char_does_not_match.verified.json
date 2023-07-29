@@ -1,4 +1,4 @@
 ﻿{
   "Value": null,
-  "Error": "Expectation: The character f, Actual: b, Input before: bar, Input after: ar"
+  "Error": "Expectation: The character f, Actual: b, Input: bar"
 }
