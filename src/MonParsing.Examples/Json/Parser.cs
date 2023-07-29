@@ -1,9 +1,9 @@
 using MonParsing.Core;
 using static MonParsing.Core.Parser;
 
-namespace MonParsing.Examples;
+namespace MonParsing.Examples.Json;
 
-public static class Json
+public static class Parser
 {
     private static Parser<Unit> Whitespace =
         from w in ZeroOrMore(If(c => c == ' ' || c == '\n' || c == '\r' || c == '\t'))

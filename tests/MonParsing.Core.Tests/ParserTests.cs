@@ -1,28 +1,13 @@
 using System.Diagnostics;
+
 using FluentAssertions;
 using static MonParsing.Core.Parser;
-using static MonParsing.Core.Result;
 
 namespace MonParsing.Core.Tests;
 
+[UsesVerify]
 public class ParserTests
 {
-    [Fact]
-    public void Zero_never_parses() =>
-        Zero<char>("foo").Should().BeEquivalentTo(new { Error = "Invalid input: foo" });
-
-    [Fact]
-    public void Zero_truncates_input_in_error_message_when_it_has_length_more_than_10() =>
-        Zero<char>("12345678910")
-            .Should()
-            .BeEquivalentTo(new { Error = "Invalid input: 1234567891..." });
-
-    [Fact]
-    public void Zero_does_not_truncate_input_in_error_message_when_it_has_length_10() =>
-        Zero<char>("0123456789")
-            .Should()
-            .BeEquivalentTo(new { Error = "Invalid input: 0123456789" });
-
     [Fact]
     public void Result_does_not_consume_from_input_and_returns_given_value() =>
         Result("foo")("bar")
@@ -30,16 +15,15 @@ public class ParserTests
             .BeEquivalentTo(new { Value = new { Result = "foo", Input = "bar" } });
 
     [Fact]
-    public void Item_does_not_parse_empty_input() =>
-        Item("").Should().BeEquivalentTo(new { Error = "Empty input" });
+    public Task Item_does_not_parse_empty_input() => Verify(Item(""));
 
     [Fact]
     public void Item_parses_first_item() =>
         Item("foo").Should().BeEquivalentTo(new { Value = new { Result = 'f', Input = "oo" } });
 
     [Fact]
-    public void If_does_not_parse_input_when_predicate_is_not_satisfied() =>
-        If(c => c == 'f')("bar").Should().BeEquivalentTo(new { Error = "Invalid input: bar" });
+    public Task If_does_not_parse_input_when_predicate_is_not_satisfied() =>
+        Verify(If(c => c == 'f', expectation: "f")("bar"));
 
     [Fact]
     public void If_parses_input_when_predicate_is_satisfied() =>
@@ -48,8 +32,8 @@ public class ParserTests
             .BeEquivalentTo(new { Value = new { Result = 'f', Input = "oo" } });
 
     [Fact]
-    public void Char_does_not_parse_input_when_first_char_does_not_match() =>
-        Char('f')("bar").Should().BeEquivalentTo(new { Error = "Invalid input: bar" });
+    public Task Char_does_not_parse_input_when_first_char_does_not_match() =>
+        Verify(Char('f')("bar"));
 
     [Fact]
     public void Char_parses_input_when_first_char_matches() =>
@@ -74,16 +58,13 @@ public class ParserTests
             .BeEquivalentTo(new { Value = new { Result = Convert.ToChar(digit), Input = "" } });
 
     [Fact]
-    public void Digit_does_not_parse_non_digit() =>
-        Digit("foo").Should().BeEquivalentTo(new { Error = "Invalid input: foo" });
+    public Task Digit_does_not_parse_non_digit() => Verify(Digit("foo"));
 
     [Fact]
-    public void Lower_does_not_parse_non_letter() =>
-        Lower("_oo").Should().BeEquivalentTo(new { Error = "Invalid input: _oo" });
+    public Task Lower_does_not_parse_non_letter() => Verify(Lower("_oo"));
 
     [Fact]
-    public void Lower_does_not_parse_upper_case_character() =>
-        Lower("Foo").Should().BeEquivalentTo(new { Error = "Invalid input: Foo" });
+    public Task Lower_does_not_parse_upper_case_character() => Verify(Lower("Foo"));
 
     [Fact]
     public void Lower_parses_lower_case_character() =>
@@ -98,12 +79,10 @@ public class ParserTests
         Lower("z").Should().BeEquivalentTo(new { Value = new { Result = 'z', Input = "" } });
 
     [Fact]
-    public void Upper_does_not_parse_non_letter() =>
-        Upper("_oo").Should().BeEquivalentTo(new { Error = "Invalid input: _oo" });
+    public Task Upper_does_not_parse_non_letter() => Verify(Upper("_oo"));
 
     [Fact]
-    public void Upper_does_not_parse_lower_case_character() =>
-        Upper("foo").Should().BeEquivalentTo(new { Error = "Invalid input: foo" });
+    public Task Upper_does_not_parse_lower_case_character() => Verify(Upper("foo"));
 
     [Fact]
     public void Upper_parses_upper_case_character() =>
@@ -128,14 +107,11 @@ public class ParserTests
             .BeEquivalentTo(new { Value = new { Result = "hello", Input = " world" } });
 
     [Fact]
-    public void String_does_not_parse_input_that_does_not_match() =>
-        String("hello")("helicopter123456")
-            .Should()
-            .BeEquivalentTo(new { Error = "Invalid input: icopter123..." });
+    public Task String_does_not_parse_input_that_does_not_match() =>
+        Verify(String("hello")("helicopter123456"));
 
     [Fact]
-    public void Integer_does_not_parse_non_integer() =>
-        Integer("foo").Should().BeEquivalentTo(new { Error = "Invalid input: foo" });
+    public Task Integer_does_not_parse_non_integer() => Verify(Integer("foo"));
 
     [Fact]
     public void Integer_parses_positive_number() =>
@@ -148,7 +124,7 @@ public class ParserTests
     [Fact]
     public void Or_short_circuits()
     {
-        IResult<IParseResult<string>> ThrowingParser(string input)
+        static IResult<IStatePair<string>> ThrowingParser(string input)
         {
             throw new UnreachableException();
         }

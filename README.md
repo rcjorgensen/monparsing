@@ -9,53 +9,108 @@ C# library for writing any parser using monadic parser combinators and LINQ synt
 
 ```csharp
 using MonParsing.Core;
-using static MonParsing.Core.Parsers;
+using static MonParsing.Core.Parser;
 
-// Example of simplified SemVer parser
-// https://semver.org/
-public static class SemVer
+public class SemVer
 {
-    public static Parser<string> PositiveDigit =
-        from d in Sat(x => '1' <= x && x <= '9')
-        select d.ToString();
+    public required SemVerCore VersionCore { get; init; }
 
-    public static Parser<string> ZeroDigit =
-        from z in Char('0')
-        select z.ToString();
+    public PreRelease? PreRelease { get; init; }
 
-    private static Parser<string> Digit = ZeroDigit.Or(PositiveDigit);
+    public Build? Build { get; init; }
 
-    private static Parser<string> DigitsWithoutLeadingZero =
-        from p in PositiveDigit
-        from ds in OneOrMore(Digit)
-        select p + ds;
+    public static Parser<SemVer> Parser { get; private set; }
 
-    private static Parser<string> NumericIdentifier =
-        Digit.Or(DigitsWithoutLeadingZero);
+    static SemVer()
+    {
+        var letter = Lower.Or(Upper);
+        var positive = If(x => '1' <= x && x <= '9');
+        var zero = Char('0');
+        var digit = zero.Or(positive);
+        var digits = OneOrMore(digit);
+        var dash = Char('-');
+        var nonDigit = letter.Or(dash);
+        var identifierCharacter = digit.Or(nonDigit);
+        var numericIdentifier = String(zero)
+            .Or(from p in positive from ds in ZeroOrMore(digit) select ds.Prepend(p));
+        var alphanumericIdentifier = (
+            from nd in nonDigit
+            from ics in ZeroOrMore(identifierCharacter)
+            select ics.Prepend(nd)
+        ).Or(OneOrMore(identifierCharacter));
+        var buildIdentifier = alphanumericIdentifier.Or(digits);
+        var preReleaseIdentifier = alphanumericIdentifier.Or(numericIdentifier);
+        var dot = Char('.');
+        var build =
+            from bis in OneOrMoreSeparated(String(buildIdentifier), dot)
+            select new Build { Identifiers = bis };
+        var preRelease =
+            from pris in OneOrMoreSeparated(String(preReleaseIdentifier), dot)
+            select new PreRelease { Identifiers = pris };
+        var version = from n in String(numericIdentifier) select int.Parse(n);
+        var semVerCore =
+            from major in version
+            from minor in dot.And(version)
+            from patch in dot.And(version)
+            select new SemVerCore
+            {
+                Major = major,
+                Minor = minor,
+                Patch = patch
+            };
+        var plus = Char('+');
 
-    private static Parser<char> Dot = Char('.');
-
-    private static Parser<string> VersionCore =
-        from major in NumericIdentifier
-        from dot1 in Dot
-        from minor in NumericIdentifier
-        from dot2 in Dot
-        from patch in NumericIdentifier
-        select major + dot1 + minor + dot2 + patch;
-
-    // ... pre-release syntax omitted
-
-    public static Parser<string> Parse = VersionCore;
+        // The main parser
+        Parser =
+            from vc in semVerCore
+            from pr in ZeroOrOne(dash.And(preRelease))
+            from b in ZeroOrOne(plus.And(build))
+            select new SemVer
+            {
+                VersionCore = vc,
+                PreRelease = pr.Value,
+                Build = b.Value
+            };
+    }
 }
 
-// Parses a valid SemVer in this case just returning the input
-IResult<IParseResult<string>> valid = SemVer.Parse("1.2.3");
-// { Value: "1.2.3", Error: null }
+public record struct SemVerCore(int Major, int Minor, int Patch);
 
-// Returns an error result since leading zeros are not allowed
-IResult<IParseResult<string>> invalid = SemVer.Parse("00.1.0");
-// { Value: null, Error: "Invalid input: 00.1.0" }
+public record PreRelease
+{
+    public required IEnumerable<string> Identifiers { get; init; }
+}
+
+public record Build
+{
+    public required IEnumerable<string> Identifiers { get; init; }
+}
+
+SemVer.Parser("1.0.0");
+// {
+//   "Value": {
+//     "Result": {
+//       "VersionCore": {
+//         "Major": 1,
+//         "Minor": 0,
+//         "Patch": 0
+//       },
+//     },
+//     "Input": ""
+//   },
+//  "Error": null
+//}
+
+SemVer.Parser("01.0.0")
+// {
+//   "Value": null,
+//   "Error": "Expectation: The character ., Actual: 1, Input 1.0.0"
+// }
 ```
+
+# Examples
+
+A number of example parsers can be found in [MonParsing.Examples](https://github.com/rcjorgensen/monparsing/tree/main/src/MonParsing.Examples). In addition to the examples the [tests](https://github.com/rcjorgensen/monparsing/tree/main/tests) are a good place to become familiar with how the library works.
 
 # Acknowledgements
 
