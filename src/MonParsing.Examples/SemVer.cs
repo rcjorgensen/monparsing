@@ -12,8 +12,7 @@ public class SemVer
 
     public Build? Build { get; init; }
 
-    private static Parser<SemVer> _parser;
-    public static Parser<SemVer> Parser => _parser;
+    public static Parser<SemVer> Parser { get; private set; }
 
     static SemVer()
     {
@@ -54,7 +53,7 @@ public class SemVer
             };
         var plus = Char('+');
 
-        _parser =
+        Parser =
             from vc in semVerCore
             from pr in ZeroOrOne(dash.And(preRelease))
             from b in ZeroOrOne(plus.And(build))
