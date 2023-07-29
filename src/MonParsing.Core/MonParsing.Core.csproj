@@ -7,12 +7,12 @@
     <Nullable>enable</Nullable>
 
     <PackageId>MonParsing</PackageId>
-    <PackageVersion>1.0.0-alpha</PackageVersion>
+    <PackageVersion>0.2.0</PackageVersion>
     <Authors>Rolf Christian Jørgensen</Authors>
-    <Description>A library containing a monadic parser type and a set of combinators that can be used to construct arbitrary parsers</Description>
+    <Description>C# library for writing parsers using monadic parser combinators and LINQ syntax</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>Parsing</PackageTags>
-    <RepositoryUrl>https://github.com/rcjorgensen/monparsing-csharp</RepositoryUrl>
+    <RepositoryUrl>https://github.com/rcjorgensen/monparsing</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
