@@ -1,6 +1,6 @@
 # MonParsing
 
-C# library for writing any parser using monadic parser combinators and LINQ syntax.
+C# library for writing parsers using monadic parser combinators and LINQ syntax.
 
 [![Nuget](https://img.shields.io/nuget/v/MonParsing)](https://www.nuget.org/packages/MonParsing)
 [![Nuget](https://img.shields.io/nuget/dt/MonParsing)](https://www.nuget.org/packages/MonParsing)
