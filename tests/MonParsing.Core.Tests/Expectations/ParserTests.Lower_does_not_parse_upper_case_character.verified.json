@@ -1,0 +1,4 @@
+﻿{
+  "Value": null,
+  "Error": "Expectation: A lowercase character between a and z, Actual: F, Input before: Foo, Input after: oo"
+}

@@ -9,6 +9,13 @@ public interface IResult<out T>
     IResult<U> AndThen<U>(Func<T, IResult<U>> selector);
 
     IResult<U> Map<U>(Func<T, U> selector);
+
+    IResult<U> Select<U>(Func<T, U> selector) => Map(selector);
+
+    IResult<U> SelectMany<U>(Func<T, IResult<U>> selector) => AndThen(selector);
+
+    IResult<U> SelectMany<U, V>(Func<T, IResult<V>> k, Func<T, V, U> s) =>
+        SelectMany(t => k(t).Select(v => s(t, v)));
 }
 
 internal class Result<T> : IResult<T>
@@ -24,26 +31,17 @@ internal class Result<T> : IResult<T>
     }
 
     public T? Value { get; }
+
     public string? Error { get; }
 
     public IResult<U> AndThen<U>(Func<T, IResult<U>> selector)
     {
-        if (Value != null)
-        {
-            return selector(Value);
-        }
-
-        return new Result<U>(Error);
+        return Value != null ? selector(Value) : new Result<U>(Error);
     }
 
     public IResult<U> Map<U>(Func<T, U> selector)
     {
-        if (Value != null)
-        {
-            return new Result<U>(selector(Value));
-        }
-
-        return new Result<U>(Error);
+        return Value != null ? new Result<U>(selector(Value)) : (IResult<U>)new Result<U>(Error);
     }
 }
 

@@ -1,0 +1,4 @@
+﻿{
+  "Value": null,
+  "Error": "Expectation: The character 0, Actual: f, Input before: foo, Input after: oo OR Expectation: A digit between 1 and 9, Actual: f, Input before: foo, Input after: oo OR Expectation: The character -, Actual: f, Input before: foo, Input after: oo"
+}
