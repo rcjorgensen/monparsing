@@ -56,11 +56,25 @@ public static class Parser
     public static Parser<IOption<T>> ZeroOrOne<T>(Parser<T> parser) =>
         parser.Map(Some).Or(Result(None<T>()));
 
-    // TODO: Rewrite without recursion
+    private static IResult<IStatePair<IEnumerable<T>>> ZeroOrMore<T>(Parser<T> parser, string input)
+    {
+        var results = new List<T>();
+        var nextInput = input;
+        var result = parser(input);
+
+        while (result.Value != null)
+        {
+            results.Add(result.Value.Result);
+            nextInput = result.Value.Input;
+
+            result = parser(nextInput);
+        }
+
+        return Ok(StatePair.Of(results, nextInput));
+    }
+
     public static Parser<IEnumerable<T>> ZeroOrMore<T>(Parser<T> parser) =>
-        (from x in parser from xs in ZeroOrMore(parser) select xs.Prepend(x)).Or(
-            Result(Enumerable.Empty<T>())
-        );
+        (string input) => ZeroOrMore(parser, input);
 
     public static Parser<IEnumerable<T>> OneOrMore<T>(Parser<T> parser) =>
         from x in parser
